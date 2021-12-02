@@ -1,4 +1,8 @@
-all: build/day01.gba
+ROMS = \
+	build/day01.gba \
+	build/day02.gba \
+
+all: $(ROMS)
 
 build/%.gba: build/%.elf
 	$(DEVKITARM)/bin/arm-none-eabi-objcopy \
@@ -25,4 +29,4 @@ build/%.o: %.s %-data.s crt0.s common.s
 clean:
 	rm -rf build/
 
-.PHONY: clean
+.PHONY: all clean

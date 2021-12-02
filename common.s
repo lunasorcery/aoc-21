@@ -2,6 +2,12 @@
 	swi (\id << 16)
 .endm
 
+.macro arm_fn
+	.balign 4
+	.arm
+.endm
+
+
 
 .arm
 setup_for_display:
