@@ -134,7 +134,6 @@ p1_found_winner:
 	@ r7: winning board pointer
 	@ r9: cell index
 	@ r10: cell mask
-	@ r11: winning board state pointer (ram)
 
 	mov r0, #0		@ set the score to 0
 	mov r9, #0		@ cell index
