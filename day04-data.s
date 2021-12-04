@@ -1,3 +1,5 @@
+.equ day04_test_data_num_boards, (day04_test_data_boards_end-day04_test_data_boards_start)/25
+
 day04_test_data_calls_start:
 .byte 7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 day04_test_data_calls_end:
@@ -22,6 +24,9 @@ day04_test_data_boards_start:
 .byte  2,  0, 12,  3,  7
 day04_test_data_boards_end:
 
+
+
+.equ day04_data_num_boards, (day04_data_boards_end-day04_data_boards_start)/25
 
 day04_data_calls_start:
 .byte 6,69,28,50,36,84,49,13,48,90,1,33,71,0,94,59,53,58,60,96,30,34,29,91,11,41,77,95,17,80,85,93,7,9,74,89,18,25,26,8,87,38,68,5,12,43,27,46,62,73,16,55,22,4,65,76,54,52,83,10,21,67,15,47,45,40,35,66,79,51,75,39,64,24,37,72,3,44,82,32,78,63,57,2,86,31,19,92,14,97,20,56,88,81,70,61,42,99,23,98
