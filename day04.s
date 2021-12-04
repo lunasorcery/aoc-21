@@ -55,9 +55,9 @@ aoc_day04:
 	bne p1_loop_per_board_clear_ram
 
 
-	@ r0: current board state bitfield
 	@ r1: current board cell
 	@ r2: current call
+	@ r3: current board state bitfield
 	@ r5: current call pointer
 	@ r6: end call pointer
 	@ r7: current board pointer
@@ -72,58 +72,58 @@ aoc_day04:
 
 	ldr r5, =day04_data_calls_start
 	p1_loop_per_call:
-		ldrb r2, [r5], #1
+		ldrb r2, [r5], #1 @ load the called number, and advance
 
 		ldr r7, =day04_data_boards_start
 		ldr r11, =0x03000000
 		p1_loop_per_board:
-			mov r9, #0
-			mov r10, #1
-			ldr r0, [r11]
+			ldr r3, [r11]
 
-			@ if it's already won (flag in top bit of state)
+			@ if the board is already won (flag in top bit of state)
 			@ skip ahead
 			mov r1, #0x80000000
-			tst r0, r1
+			tst r3, r1
 			bne p1_next_board
 
+			mov r9, #0		@ cell index
+			mov r10, #1		@ cell mask
 			p1_loop_per_cell:
-				ldrb r1, [r7, r9]
-				cmp r1, r2
+				ldrb r1, [r7, r9]	@ load the board cell
+				cmp r1, r2			@ check if it matches the called number
 				bne p1_next_cell
-					orr r0, r10
-					str r0, [r11]
+					orr r3, r10		@ if it matches, set the corresponding bit
+					str r3, [r11]	@ and write the state back to ram
 				p1_next_cell:
-				lsl r10, #1
-				add r9, #1
-				cmp r9, #25
+				lsl r10, #1	@ advance the mask
+				add r9, #1	@ increment the cell index
+				cmp r9, #25	@ loop until we hit cell 25
 			bne p1_loop_per_cell
 
 			@ check if it's a winning board
+			mov r0, r3
 			bl is_winning_board
 			cmp r0, #0
 			beq p1_next_board
 
 				@ if it's a winning board
-				@ decrement the counter,
+				@ decrement the win-counter,
 				@ and jump out if we've found the Nth winning board we want
 				subs r12, #1
 				beq p1_found_winner
 
-				@ if it's a winning board but *not* the Nth we want
+				@ if it's a winning board but *not* the Nth we want,
 				@ mark it as already won so we can skip processing it
 				mov r1, #0x80000000
-				orr r0, r1
-				str r0, [r11]
+				orr r3, r1
+				str r3, [r11]
 				
 			p1_next_board:
-			add r11, #4
-			add r7, #25
-			cmp r7, r8
+			add r11, #4	@ move the board state pointer (ram)
+			add r7, #25	@ move the board pointer (rom)
+			cmp r7, r8	@ loop until we've hit the last board
 		bne p1_loop_per_board
 		
-
-		cmp r5, r6
+		cmp r5, r6	@ loop until we've hit the last call
 	bne p1_loop_per_call
 
 p1_found_winner:
@@ -136,21 +136,21 @@ p1_found_winner:
 	@ r10: cell mask
 	@ r11: winning board state pointer (ram)
 
-	mov r0, #0
-	ldr r3, [r11]
-	mov r9, #0
-	mov r10, #1
+	mov r0, #0		@ set the score to 0
+	mov r9, #0		@ cell index
+	mov r10, #1		@ cell mask
 	p1_loop_per_cell_totals:
-		tst r3, r10
+		tst r3, r10		@ check if the cell was hit
 		bne p1_next_cell_totals
-			ldrb r1, [r7, r9]
-			add r0, r1
+			ldrb r1, [r7, r9]	@ if it wasn't, load the number in that cell
+			add r0, r1			@ add it to the score
 		p1_next_cell_totals:
-		lsl r10, #1
-		add r9, #1
-		cmp r9, #25
+		lsl r10, #1	@ advance the mask
+		add r9, #1	@ increment the cell index
+		cmp r9, #25	@ loop until we hit cell 25
 	bne p1_loop_per_cell_totals
-	mul r0, r2
+
+	mul r0, r2	@ multiply score by winning call, to get final score
 
 	pop {r1-r12}
 	pop {lr}
