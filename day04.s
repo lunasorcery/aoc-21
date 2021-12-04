@@ -77,7 +77,7 @@ aoc_day04:
 		ldr r7, =day04_data_boards_start
 		ldr r11, =0x03000000
 		p1_loop_per_board:
-			ldr r3, [r11]
+			ldr r3, [r11]	@ load board state from ram
 
 			@ if the board is already won (flag in top bit of state)
 			@ skip ahead
