@@ -55,20 +55,42 @@ plot_pixel_ret:
 
 
 arm_fn
+get_line_start_and_length:
+	push {r5-r8}
+
+	@ r5 = A.x
+	lsl r5, r1, #16
+	lsr r5, r5, #16
+
+	@ r6 = A.y
+	lsr r6, r1, #16
+
+	@ r7 = B.x
+	lsl r7, r2, #16
+	lsr r7, r7, #16
+
+	@ r8 = B.y
+	lsr r8, r2, #16
+
+	@ get line start index
+	add r3, r5, r6, lsl #10 @ r3 = A.y * 1024 + A.x
+
+	@ get line length (max of X2-X1 and Y2-Y1)
+	sub r7, r5
+	sub r8, r6
+	cmp r7, r8
+	movgt r4, r7
+	movle r4, r8
+
+	pop {r5-r8}
+	bx lr
+
+
+
+arm_fn
 draw_diagonal_topleft:
 	push {lr}
-	@ r3 = A.x
-	lsl r3, r1, #16
-	lsr r3, r3, #16
-
-	@ r4 = A.y
-	lsr r4, r1, #16
-
-	@ r5 = B.y
-	lsr r5, r2, #16
-
-	add r3, r3, r4, lsl #10 @ r3 = A.y * 1024 + A.x
-	sub r4, r5, r4 @ r4 = B.y - A.y
+	bl get_line_start_and_length
 
 	draw_diagonal_topleft_loop:
 		bl plot_pixel
@@ -85,18 +107,7 @@ draw_diagonal_topleft:
 arm_fn
 draw_diagonal_topright:
 	push {lr}
-	@ r3 = A.x
-	lsl r3, r1, #16
-	lsr r3, r3, #16
-
-	@ r4 = A.y
-	lsr r4, r1, #16
-
-	@ r5 = B.y
-	lsr r5, r2, #16
-
-	add r3, r3, r4, lsl #10 @ r3 = A.y * 1024 + A.x
-	sub r4, r5, r4 @ r4 = B.y - A.y
+	bl get_line_start_and_length
 
 	draw_diagonal_topright_loop:
 		bl plot_pixel
@@ -114,19 +125,7 @@ draw_diagonal_topright:
 arm_fn
 draw_horizontal:
 	push {lr}
-	@ r3 = A.y
-	lsr r3, r1, #16
-
-	@ r4 = A.x
-	lsl r4, r1, #16
-	lsr r4, r4, #16
-
-	@ r5 = B.x
-	lsl r5, r2, #16
-	lsr r5, r5, #16
-
-	add r3, r4, r3, lsl #10 @ r3 = A.y * 1024 + A.x
-	sub r4, r5, r4 @ r4 = B.x - A.x
+	bl get_line_start_and_length
 
 	draw_horizontal_loop:
 		bl plot_pixel
@@ -143,18 +142,7 @@ draw_horizontal:
 arm_fn
 draw_vertical:
 	push {lr}
-	@ r3 = A.x
-	lsl r3, r1, #16
-	lsr r3, r3, #16
-
-	@ r4 = A.y
-	lsr r4, r1, #16
-
-	@ r5 = B.y
-	lsr r5, r2, #16
-
-	add r3, r3, r4, lsl #10 @ r3 = A.y * 1024 + A.x
-	sub r4, r5, r4 @ r4 = B.y - A.y
+	bl get_line_start_and_length
 
 	draw_vertical_loop:
 		bl plot_pixel
