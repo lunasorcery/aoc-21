@@ -5,9 +5,8 @@
 
 
 .macro u64_add a_lo, a_hi, b_lo, b_hi
-	add \a_hi, \b_hi 	@ add high bits
-	adds \a_lo, \b_lo 	@ add low bits and set carry flag if appropriate
-	addcs \a_hi, #1 	@ carry 1
+	adds \a_lo, \b_lo	@ add low bits and set carry flag if appropriate
+	adc  \a_hi, \b_hi	@ add high bits with carry
 .endm
 
 
