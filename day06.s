@@ -4,6 +4,13 @@
 .include "day06-data.s"
 
 
+.macro u64_add a_lo, a_hi, b_lo, b_hi
+	add \a_hi, \b_hi 	@ add high bits
+	adds \a_lo, \b_lo 	@ add low bits and set carry flag if appropriate
+	addcs \a_hi, #1 	@ carry 1
+.endm
+
+
 arm_fn
 aoc_day06_part1_firsttry:
 	push {r1-r11,lr}
@@ -152,9 +159,90 @@ aoc_day06_part1_redo:
 
 arm_fn
 aoc_day06_part2:
-	push {r1-r11,lr}
+	push {r2-r9,lr}
 
-	pop {r1-r11}
+	.equ p2_array_length, 9*8 @ 9 values x 8 bytes per value
+
+	@ free some stack space for u64[9] counters
+	sub sp, #p2_array_length
+
+	@ clear the stack array
+	mov r0, #0
+	mov r1, #p2_array_length
+	p2_loop_clear_array:
+		subs r1, #4
+		str r0, [sp, r1]
+	bne p2_loop_clear_array
+
+	@ load the initial state
+	@ don't bother doing 64bit incrementing as we can
+	@ reasonably assume that the initial data won't have more than 2^32-1 values of a given lifespan
+	@ as to do so wouldn't fit in a GBA ROM :)
+	ldr r2, =day06_data_start
+	ldr r3, =day06_data_end
+	p2_loop_per_initial_fish:
+		ldrb r0, [r2], #1	@ load a fish from the dataset
+		lsl r0, #3			@ multiply by 8 to get byte offset into stack array
+		ldr r1, [sp, r0]	@ load,
+		add r1, #1			@ increment,
+		str r1, [sp, r0]	@ and save the number of fish at that lifespan
+		cmp r2, r3
+	bne p2_loop_per_initial_fish
+
+	@ set up pointers to special values in the circular buffer
+	mov r6, #(6*8)  @ r6 tracks where the counter of fish with lifespan 6 is
+	mov r8, #(8*8)  @ r8 tracks where the counter of fish with lifespan 8 is
+	@ carefully chosen to almost be sensible variable names ;)
+
+	@ simulation
+	mov r4, #256 @ day counter
+	p2_loop_per_day:
+		@ do a rotate!
+		@ by advancing the pointers into the circular buffer,
+		@ instead of rotating data in the buffer itself
+		add r6, #8
+		cmp r6, #p2_array_length
+		moveq r6, #0
+		add r8, #8
+		cmp r8, #p2_array_length
+		moveq r8, #0	
+
+		add r7, r6, #4 @ offset of lifespan-6 upper bits
+		add r9, r8, #4 @ offset of lifespan-8 upper bits
+
+		@ load the counter for lifespan-6 into r0 (lo) and r1 (hi)
+		ldr r0, [sp, r6]
+		ldr r1, [sp, r7]
+
+		@ load the counter for lifespan-8 into r2 (lo) and r3 (hi)
+		ldr r2, [sp, r8]
+		ldr r3, [sp, r9]
+
+		u64_add r0, r1, r2, r3
+
+		@ store the counter for lifespan-6 back to the stack
+		str r0, [sp, r6]
+		str r1, [sp, r7]
+
+		subs r4, #1
+	bne p2_loop_per_day
+
+	@ sum it all up into r0 (lo) and r1 (hi)
+	mov r0, #0
+	mov r1, #0
+	mov r4, #9
+	mov r5, sp
+	p2_loop_accumulate:
+		ldr r2, [r5], #4 @ lo
+		ldr r3, [r5], #4 @ hi
+		u64_add r0, r1, r2, r3
+		subs r4, #1
+	bne p2_loop_accumulate
+
+	@ pop the stack array
+	add sp, #p2_array_length
+
+	pop {r2-r9}
 	pop {lr}
 	bx lr
 .pool
@@ -166,15 +254,16 @@ main:
 
 	bl aoc_day06_part1_firsttry
 	mov r1, #0
-	bl display_number
+	bl print_u32_dec
 
 	bl aoc_day06_part1_redo
 	mov r1, #1
-	bl display_number
+	bl print_u32_dec
 
 	bl aoc_day06_part2
-	mov r1, #2
-	bl display_number
+
+	mov r2, #2
+	bl print_u64_dec
 
 spin_halt:
 	b spin_halt
