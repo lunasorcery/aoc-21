@@ -199,10 +199,8 @@ aoc_day07_part2:
 			ldrh r3, [r5], #2
 			subs r3, r0 @ subtract destination pos
 			neglt r3, r3 @ invert if negative
-			mul r4, r3, r3 @ r4 = n*n
-			add r3, r4 @ r3 = n*n+n
-			lsr r3, #1 @ r3 = (n*n+n)/2
-			add \rDest, r3 @ add to total
+			mla r4, r3, r3, r3 @ r4 = n*n+n
+			add \rDest, r4, lsr #1 @ add `(n*n+n)/2` to total
 			cmp r5, r6
 		bne p2_loop_sum_fuel_costs_\@
 	.endm
