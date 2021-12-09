@@ -6,6 +6,7 @@ ROMS = \
 	build/day05.gba \
 	build/day06.gba \
 	build/day07.gba \
+	build/day08.gba \
 
 all: $(ROMS)
 
