@@ -166,7 +166,7 @@ aoc_day08_part2:
 		p2_loop_find_6:
 			ldrb r1, [sp, r4]	@ load nth item from unsorted set
 			ldrb r2, [r5, r1]	@ count bits
-			cmp r2, #6			@ check it's got 5 bits
+			cmp r2, #6			@ check it's got 6 bits
 			bne p2_loop_find_6_next
 				ldrb r3, [r6, #1]	@ load bit-pattern for 1
 				mov r2, #0x7f
