@@ -128,11 +128,18 @@ aoc_day08_part2:
 			cmp r2, #4 @ if it's got 4 bits, then it's 4
 			streqb r1, [r6, #4] @ write to sorted set
 
-			cmp r2, #7 @ if it's got 7 bits, then it's 8
-			streqb r1, [r6, #8] @ write to sorted set
-
 			subs r4, #1
 		bge p2_loop_find_by_bitcount @ loop through all 10 input values
+
+		@  --
+		@ |  |
+		@  --
+		@ |  |
+		@  --
+		@ 8 has all 7 bits set
+		@ so it doesn't matter which bit is which
+		mov r2, #0x7f
+		strb r2, [r6, #8]
 
 		@  --
 		@    |
