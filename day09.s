@@ -95,7 +95,7 @@ arm_fn
 @ returns:
 @ r0: size
 flood_fill:
-	push {r1-r12,lr}
+	push {r1,r4-r7,lr}
 
 	@ get memory address of target pixel
 	mov r5, #day09_data_width
@@ -163,7 +163,7 @@ flood_fill:
 
 	mov r0, r4	@ return size counter
 	
-	pop {r1-r12}
+	pop {r1,r4-r7}
 	pop {lr}
 	bx lr
 .pool
