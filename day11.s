@@ -6,25 +6,25 @@
 
 arm_fn
 load_data_into_ram:
-	push {r1-r6,lr}
+	push {r0-r4,lr}
 
 	@ load data into ram
-	mov r6, #0x03000000
-	ldr r5, =day11_data_start
+	mov r1, #0x03000000 @ ram ptr
+	ldr r2, =day11_data_start @ rom ptr
 	mov r4, #day11_data_height
 	copy_to_ram_per_row:
 		mov r3, #day11_data_width
 		copy_to_ram_per_col:
-			ldrb r1, [r5], #1
-			sub r1, #'0'
-			strb r1, [r6], #1
+			ldrb r0, [r2], #1
+			sub r0, #'0'
+			strb r0, [r1], #1
 			subs r3, #1
 		bne copy_to_ram_per_col
-		add r5, #1 @ skip null terminator
+		add r2, #1 @ skip null terminator
 		subs r4, #1
 	bne copy_to_ram_per_row
 
-	pop {r1-r6}
+	pop {r0-r4}
 	pop {lr}
 	bx lr
 .pool
@@ -33,7 +33,7 @@ load_data_into_ram:
 
 arm_fn
 print_grid:
-	push {r0-r6,lr}
+	push {r0-r5}
 
 
 	@ wait for vblank
@@ -44,40 +44,39 @@ wait_for_vblank:
 	bne wait_for_vblank
 	
 
-	mov r6, #0x03000000 @ ram ptr
+	mov r4, #0x03000000 @ ram ptr
 	mov r5, #0x06000000 @ vram ptr
 
-	mov r4, #0	@y
+	mov r3, #day11_data_height
 	print_grid_per_row:
-		mov r3, #0	@x
+		mov r2, #0	@x
 		print_grid_per_col:
 			@ read from ram
-			ldrb r2, [r6], #1
+			ldrb r0, [r4], #1
 
 			@ toggle palette if appropriate
-			cmp r2, #0
-			addne r2, #0x1000
+			cmp r0, #0
+			addne r0, #0x1000
 
 			@ increment to get tile id
-			add r2, #1
+			add r0, #1
 
 			@ get vram offset from x
-			lsl r1, r3, #1
+			lsl r1, r2, #1
 
-			strh r2, [r5, r1]
+			strh r0, [r5, r1]
 
-			add r3, #1
-			cmp r3, #day11_data_width
+			add r2, #1
+			cmp r2, #day11_data_width
 		blt print_grid_per_col
 
+		@ move vram ptr to next row
 		add r5, #64
 
-		add r4, #1
-		cmp r4, #day11_data_height
-	blt print_grid_per_row
+		subs r3, #1
+	bne print_grid_per_row
 
-	pop {r0-r6}
-	pop {lr}
+	pop {r0-r5}
 	bx lr
 .pool
 
