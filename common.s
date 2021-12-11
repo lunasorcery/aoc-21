@@ -43,14 +43,14 @@ arm_fn
 @ r1: screen row to display on
 print_u32_dec:
 display_number:
-	push {r0-r2}
+	push {r0-r3}
 	ldr r2, =0x06000030
 	add r2, r1, lsl #6
 
 display_number_loop:
 	@ div/mod by 10
 	mov r1, #10
-	arm_swi 0x06 @ div
+	arm_swi 0x06 @ div (stomps r3)
 
 	@ store modulo value to vram and decrement the write pointer
 	add r1, #1
@@ -61,7 +61,7 @@ display_number_loop:
 	cmp r0, #0
 	bne display_number_loop
 
-	pop {r0-r2}
+	pop {r0-r3}
 	bx lr
 .pool
 
