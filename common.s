@@ -79,9 +79,9 @@ arm_fn
 print_u64_dec:
 	@ cheap trick:
 	@ if the input is < 2^32, just use the u32 function instead
-	cmp r1, #0
-	moveq r1, r2
-	beq print_u32_dec
+	@cmp r1, #0
+	@moveq r1, r2
+	@beq print_u32_dec
 
 	@ otherwise, do this for reals:
 	push {r0-r12,lr}

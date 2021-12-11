@@ -20,6 +20,7 @@ find_threshold_for_range:
 		ldrh r3, [r2], #2
 		cmp r3, r0
 		movlt r0, r3 @ r0 = min(r0,r3)
+		cmp r3, r1 @ how did I miss this???
 		movgt r1, r3 @ r1 = max(r1,r3)
 		cmp r2, r4
 	bne find_threshold_for_range_loop
